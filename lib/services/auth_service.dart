@@ -24,36 +24,28 @@ class AuthService {
   }) async {
     final db = await _databaseService.database;
 
+    // Verifica se email já existe
     final existingUser = await db.query(
       'users',
-      where: 'email = ? OR phone = ?',
-      whereArgs: [email, phone],
+      where: 'email = ?',
+      whereArgs: [email],
     );
 
     if (existingUser.isNotEmpty) {
-      throw Exception('Email ou telefone já cadastrados');
+      throw Exception('Email já cadastrado');
     }
 
     final hashedPassword = _hashPassword(password);
 
+    // Inserir usuário base
     final userId = await db.insert('users', {
       'name': name,
       'email': email,
       'password': hashedPassword,
       'phone': phone,
       'type': type,
-      'isApproved': 0,
+      'isApproved': type == 'student' ? 1 : 0, // Aprova automaticamente alunos
     });
-
-    if (type == 'teacher') {
-      await db.insert('teachers', {'userId': userId});
-    } else if (type == 'student' && additionalData != null) {
-      await db.insert('students', {
-        'userId': userId,
-        'level': additionalData['level'],
-        'registrationDate': DateTime.now().toIso8601String(),
-      });
-    }
 
     return await getUserById(userId);
   }
@@ -62,14 +54,21 @@ class AuthService {
     final db = await _databaseService.database;
     final hashedPassword = _hashPassword(password);
 
-    final result = await db.query(
-      'users',
-      where: 'email = ? AND password = ?',
-      whereArgs: [email, hashedPassword],
-    );
+    try {
+      final result = await db.query(
+        'users',
+        where: 'email = ? AND password = ?',
+        whereArgs: [email, hashedPassword],
+      );
 
-    if (result.isEmpty) return null;
-    return await getUserById(result.first['id'] as int);
+      if (result.isNotEmpty) {
+        return await getUserById(result.first['id'] as int);
+      }
+      return null;
+    } catch (e) {
+      print('Erro no login: $e');
+      return null;
+    }
   }
 
   Future<User?> getUserById(int id) async {

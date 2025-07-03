@@ -19,32 +19,52 @@ class DatabaseService {
 
   Future<Database> _initDatabase() async {
     final path = join(await getDatabasesPath(), 'english_school.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(
+      path,
+      version: 3,
+      onCreate: _onCreate,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'alter table users add coloumn email text not null default""',
+          );
+        }
+        if (oldVersion < 3) {
+          await db.execute(
+            'alter table users add column phone text not null default ""',
+          );
+        }
+      },
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-      create table users(
-        id integer prymary key autoincrement,
-        name text not null,
-        phone text not null,
-        type text not null,
-        isApproved integer not null default 0
-      )
-''');
+    CREATE TABLE users(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      type TEXT NOT NULL,
+      isApproved INTEGER NOT NULL DEFAULT 0
+    )
+  ''');
 
     await db.execute('''
-      create table teachers(
-        userId integer primary key,
-        foreign key (userId) references users(id)
-      )
-''');
+    CREATE TABLE teachers(
+      userId INTEGER PRIMARY KEY,
+      FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  ''');
 
     await db.execute('''
-      create table students(userId integer primary key,
-      level text not null,
-      foreign key (userId) references users(id)
-      )
-''');
+    CREATE TABLE students(
+      userId INTEGER PRIMARY KEY,
+      level TEXT NOT NULL,
+      registrationDate TEXT,
+      FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  ''');
   }
 }
