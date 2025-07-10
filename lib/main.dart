@@ -41,59 +41,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Escola de Inglês',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: AuthWrapper(),
+      home: LoginScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class AuthWrapper extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    _debugUsers();
-    return Scaffold(
-      appBar: AppBar(title: Text('Gerenciamento Escolar')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  ),
-              child: Text('Login'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterScreen()),
-                  ),
-              child: Text('Registrar'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _debugUsers() async {
-    final db = await DatabaseService().database;
-    final users = await db.query('users');
-    print('Usuários no banco');
-    users.forEach(print);
-  }
-}
-
 class LoginScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginPageState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController(text: 'aluno@teste.com');
   final _passwordController = TextEditingController(text: 'senha123');
@@ -116,14 +75,14 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
           );
         } else {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Email ou senha incorretos')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Email ou senha incorretos')),
+          );
         }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: $e')),
+        );
       } finally {
         setState(() => _isLoading = false);
       }
@@ -131,46 +90,261 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                validator:
-                    (value) => value!.isEmpty ? 'Digite seu email' : null,
-              ),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Senha'),
-                validator:
-                    (value) => value!.isEmpty ? 'Digite sua senha' : null,
-              ),
-              SizedBox(height: 20),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(onPressed: _login, child: Text('Entrar')),
-            ],
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'fotos/fotoprova.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 100),
+                    Text(
+                      'HELLO WORLD',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 0.8,
+                      ),
+                    ),
+                    Text(
+                      'ENGLISH SCHOOL',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Email
+                    Text(
+                      'EMAIL',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(44, 255, 255, 255),
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextFormField(
+                        controller: _emailController,
+                        validator: (value) =>
+                            value!.isEmpty ? 'Digite seu email' : null,
+                        decoration: InputDecoration(
+                          hintText: 'HELLO@EXAMPLE.COM',
+                          border: InputBorder.none,
+                        ),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Senha
+                    Text(
+                      'PASSWORD',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(52, 255, 255, 255),
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        validator: (value) =>
+                            value!.isEmpty ? 'Digite sua senha' : null,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                        ),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 50),
+
+                    // Botão de login
+                    Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 210, 198, 33),
+                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          ),
+                          child: _isLoading
+                              ? CircularProgressIndicator(
+                                  color: Colors.black,
+                                )
+                              : Text(
+                                  'LOGIN',
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // Link registrar-se
+                    Align(
+                      alignment: Alignment.center,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => OpcaoRegistro()),
+                          );
+                        },
+                        child: Text(
+                          'REGISTRAR-SE',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 21,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
+class OpcaoRegistro extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'fotos/fotoprova.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 150),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    'CADASTRAR-SE',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 80),
+                  child: Text(
+                    'Qual seu tipo de usuário?',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: 300,
+                    height: 70,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 240, 153, 39),
+                        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      ),
+                      child: Text(
+                        'SOU ALUNO',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: 300,
+                    height: 70,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 240, 153, 39),
+                        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      ),
+                      child: Text(
+                        'SOU PROFESSOR(A)',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -225,60 +399,255 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'fotos/fotoprova.jpg',
+            fit: BoxFit.cover,
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  const SizedBox(height: 100),
+                     Text(
+                    'CADASTRAR-SE',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                      
+                      const SizedBox(height: 30),
+                      Text(
+                        'NOME',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(44, 255, 255, 255),
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+            
+                Text(
+                  'EMAIL',
+                    style: TextStyle(
+                     fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                ),
+),
+Container(
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(44, 255, 255, 255),
+    border: Border.all(color: Colors.grey),
+    borderRadius: BorderRadius.circular(8),
+  ),
+  padding: const EdgeInsets.symmetric(horizontal: 12),
+  child: TextFormField(
+    controller: _emailController,
+    validator: (value) =>
+        value!.isEmpty ? 'Digite seu email' : null,
+    decoration: InputDecoration(
+      border: InputBorder.none,
+    ),
+    style: TextStyle(color: Colors.white),
+  ),
+),
+
+                       const SizedBox(height: 10),
+                Text(
+                  'SENHA',
+                    style: TextStyle(
+                     fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                ),
+),
+Container(
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(44, 255, 255, 255),
+    border: Border.all(color: Colors.grey),
+    borderRadius: BorderRadius.circular(8),
+  ),
+  padding: const EdgeInsets.symmetric(horizontal: 12),
+  child: TextFormField(
+    controller: _phoneController,
+    validator: (value) =>
+        value!.isEmpty ? 'Digite sua senha' : null,
+    decoration: InputDecoration(
+      border: InputBorder.none,
+    ),
+    style: TextStyle(color: Colors.white),
+  ),
+),
+  const SizedBox(height: 10),
+                Text(
+                  'TELEFONE',
+                    style: TextStyle(
+                     fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                ),
+),
+Container(
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(44, 255, 255, 255),
+    border: Border.all(color: Colors.grey),
+    borderRadius: BorderRadius.circular(8),
+  ),
+  padding: const EdgeInsets.symmetric(horizontal: 12),
+  child: TextFormField(
+    controller: _passwordController,
+    obscureText: true,
+                  decoration: InputDecoration(labelText: 'Senha'),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Digite sua senha' : null,
+    style: TextStyle(color: Colors.white),
+  ),
+),
+                 const SizedBox(height: 80),
+Align(
+  alignment: Alignment.center,
+  child: SizedBox(
+    width: 250,
+    height: 50,
+       child:  ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CadastroEnviadoScreen()),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 210, 198, 33),
+        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+      ),
+      child: Text(
+        'CADASTRE-SE',
+        style: TextStyle(fontSize:22, fontWeight: FontWeight.bold),
+      ),
+    ),
+                 ),
+),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+}
+
+class CadastroEnviadoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registrar')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Nome completo'),
-                validator: (value) => value!.isEmpty ? 'Digite seu nome' : null,
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                validator:
-                    (value) => value!.isEmpty ? 'Digite seu email' : null,
-              ),
-              TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(labelText: 'Telefone'),
-                validator:
-                    (value) => value!.isEmpty ? 'Digite seu telefone' : null,
-              ),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Senha'),
-                validator:
-                    (value) => value!.isEmpty ? 'Digite sua senha' : null,
-              ),
-              SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: _userType,
-                items: [
-                  DropdownMenuItem(value: 'student', child: Text('Aluno')),
-                  DropdownMenuItem(value: 'teacher', child: Text('Professor')),
-                ],
-                onChanged: (value) => setState(() => _userType = value!),
-                decoration: InputDecoration(labelText: 'Tipo de usuário'),
-              ),
-              SizedBox(height: 20),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
-                    onPressed: _register,
-                    child: Text('Registrar'),
-                  ),
-            ],
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'fotos/fotoprova.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.symmetric(horizontal: 30),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+  'Seu cadastro foi enviado para análise.\n'
+  'Você será notificado assim que for aprovado.',
+  style: TextStyle(
+    fontSize: 16,
+    color: Colors.black,
+    fontWeight: FontWeight.bold,
+  ),
+  textAlign: TextAlign.center,
+),
+),
+
+                const SizedBox(height: 30),
+  Text(
+ 'THANKS!!!',
+  style: TextStyle(
+    fontSize: 30,
+    color: const Color.fromARGB(255, 255, 255, 255),
+    fontWeight: FontWeight.bold,
+  ),
+  textAlign: TextAlign.center,
+),
+const SizedBox(height: 90),
+                SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 210, 198, 33),
+                      foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    ),
+                    child: Text(
+                      'OKAY',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -300,7 +669,7 @@ class HomeScreen extends StatelessWidget {
             onPressed:
                 () => Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => AuthWrapper()),
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
                 ),
           ),
         ],
