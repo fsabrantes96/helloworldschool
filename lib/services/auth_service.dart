@@ -44,7 +44,7 @@ class AuthService {
       'password': hashedPassword,
       'phone': phone,
       'type': type,
-      'isApproved': type == 'student' ? 1 : 0, // Aprova automaticamente alunos
+      'isApproved': 0,
     });
 
     return await getUserById(userId);
@@ -61,13 +61,19 @@ class AuthService {
         whereArgs: [email, hashedPassword],
       );
 
-      if (result.isNotEmpty) {
-        return await getUserById(result.first['id'] as int);
+      if (result.isEmpty) {
+        return null;
       }
-      return null;
+
+      final user = await getUserById(result.first['id'] as int);
+
+      if (user != null && !user.isApproved) {
+        throw Exception('Seu cadastro ainda não foi aprovado');
+      }
+      return user;
     } catch (e) {
       print('Erro no login: $e');
-      return null;
+      rethrow;
     }
   }
 

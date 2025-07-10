@@ -1,38 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:helloworldschool/services/database_service.dart';
+import 'package:helloworldschool/screens/admin_screen.dart';
+import 'services/database_service.dart';
 import 'services/auth_service.dart';
 import 'models/user_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Cadastra o usuário teste antes de iniciar o app
-  await _registerTestUser();
-
   runApp(MyApp());
-}
-
-Future<void> _registerTestUser() async {
-  final authService = AuthService();
-  try {
-    // Verifica se o usuário já existe antes de cadastrar
-    final existingUser = await authService.login("aluno@teste.com", "senha123");
-    if (existingUser == null) {
-      await authService.registerUser(
-        name: "Aluno Teste",
-        email: "aluno@teste.com",
-        password: "senha123",
-        phone: "(11) 99999-9999",
-        type: "student",
-        additionalData: {"level": "Iniciante"},
-      );
-      print("✅ Usuário teste cadastrado com sucesso!");
-    } else {
-      print("ℹ️ Usuário teste já existe");
-    }
-  } catch (e) {
-    print("⛔ Erro ao cadastrar usuário teste: $e");
-  }
 }
 
 class MyApp extends StatelessWidget {
@@ -49,13 +23,13 @@ class MyApp extends StatelessWidget {
 
 class LoginScreen extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: 'aluno@teste.com');
-  final _passwordController = TextEditingController(text: 'senha123');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
 
@@ -75,14 +49,14 @@ class _LoginPageState extends State<LoginScreen> {
             MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Email ou senha incorretos')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Email ou senha incorretos')));
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       } finally {
         setState(() => _isLoading = false);
       }
@@ -95,10 +69,7 @@ class _LoginPageState extends State<LoginScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'fotos/fotoprova.jpg',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('fotos/fotoprova.jpg', fit: BoxFit.cover),
           ),
           Center(
             child: SingleChildScrollView(
@@ -147,8 +118,9 @@ class _LoginPageState extends State<LoginScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: TextFormField(
                         controller: _emailController,
-                        validator: (value) =>
-                            value!.isEmpty ? 'Digite seu email' : null,
+                        validator:
+                            (value) =>
+                                value!.isEmpty ? 'Digite seu email' : null,
                         decoration: InputDecoration(
                           hintText: 'HELLO@EXAMPLE.COM',
                           border: InputBorder.none,
@@ -177,11 +149,10 @@ class _LoginPageState extends State<LoginScreen> {
                       child: TextFormField(
                         controller: _passwordController,
                         obscureText: true,
-                        validator: (value) =>
-                            value!.isEmpty ? 'Digite sua senha' : null,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                        ),
+                        validator:
+                            (value) =>
+                                value!.isEmpty ? 'Digite sua senha' : null,
+                        decoration: InputDecoration(border: InputBorder.none),
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -196,19 +167,26 @@ class _LoginPageState extends State<LoginScreen> {
                         child: ElevatedButton(
                           onPressed: _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 210, 198, 33),
+                            backgroundColor: const Color.fromARGB(
+                              255,
+                              210,
+                              198,
+                              33,
+                            ),
                             foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                           ),
-                          child: _isLoading
-                              ? CircularProgressIndicator(
-                                  color: Colors.black,
-                                )
-                              : Text(
-                                  'LOGIN',
-                                  style: TextStyle(
+                          child:
+                              _isLoading
+                                  ? CircularProgressIndicator(
+                                    color: Colors.black,
+                                  )
+                                  : Text(
+                                    'LOGIN',
+                                    style: TextStyle(
                                       fontSize: 22,
-                                      fontWeight: FontWeight.bold),
-                                ),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                         ),
                       ),
                     ),
@@ -253,9 +231,14 @@ class OpcaoRegistro extends StatelessWidget {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'fotos/fotoprova.jpg',
-              fit: BoxFit.cover,
+            child: Image.asset('fotos/fotoprova.jpg', fit: BoxFit.cover),
+          ),
+          Positioned(
+            top: 40,
+            left: 20,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
           Padding(
@@ -297,16 +280,33 @@ class OpcaoRegistro extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => RegisterScreen()),
+                          MaterialPageRoute(
+                            builder:
+                                (context) =>
+                                    RegisterScreen(userType: 'student'),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 240, 153, 39),
-                        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          240,
+                          153,
+                          39,
+                        ),
+                        foregroundColor: const Color.fromARGB(
+                          255,
+                          255,
+                          255,
+                          255,
+                        ),
                       ),
                       child: Text(
                         'SOU ALUNO',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -321,16 +321,33 @@ class OpcaoRegistro extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => RegisterScreen()),
+                          MaterialPageRoute(
+                            builder:
+                                (context) =>
+                                    RegisterScreen(userType: 'teacher'),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 240, 153, 39),
-                        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          240,
+                          153,
+                          39,
+                        ),
+                        foregroundColor: const Color.fromARGB(
+                          255,
+                          255,
+                          255,
+                          255,
+                        ),
                       ),
                       child: Text(
                         'SOU PROFESSOR(A)',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -344,22 +361,23 @@ class OpcaoRegistro extends StatelessWidget {
   }
 }
 
-
-
 class RegisterScreen extends StatefulWidget {
+  final String userType;
+
+  const RegisterScreen({super.key, required this.userType});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController(text: 'Novo Aluno');
-  final _emailController = TextEditingController(text: 'novo@teste.com');
-  final _phoneController = TextEditingController(text: '(11) 99999-9999');
-  final _passwordController = TextEditingController(text: 'senha123');
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
-  String _userType = 'student';
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
@@ -371,14 +389,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
           phone: _phoneController.text.trim(),
-          type: _userType,
+          type: widget.userType,
         );
 
         if (user != null) {
-          ScaffoldMessenger.of(
+          Navigator.pushReplacement(
             context,
-          ).showSnackBar(SnackBar(content: Text('Registro bem-sucedido!')));
-          Navigator.pop(context);
+            MaterialPageRoute(builder: (context) => CadastroEnviadoScreen()),
+          );
         }
       } catch (e) {
         ScaffoldMessenger.of(
@@ -391,188 +409,184 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: Stack(
-      children: [
-        Positioned.fill(
-          child: Image.asset(
-            'fotos/fotoprova.jpg',
-            fit: BoxFit.cover,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset('fotos/fotoprova.jpg', fit: BoxFit.cover),
           ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  const SizedBox(height: 100),
-                     Text(
-                    'CADASTRAR-SE',
-                    textAlign: TextAlign.left,
+          Positioned(
+            top: 40,
+            left: 20,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 100),
+                        Text(
+                          'CADASTRAR-SE',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Text(
+                          'NOME',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(44, 255, 255, 255),
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: TextFormField(
+                            controller: _nameController,
+                            validator:
+                                (value) =>
+                                    value!.isEmpty ? 'Digite seu nome' : null,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                            ),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    'EMAIL',
                     style: TextStyle(
-                      fontSize: 30,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                      
-                      const SizedBox(height: 30),
-                      Text(
-                        'NOME',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(44, 255, 255, 255),
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: TextFormField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                          ),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(44, 255, 255, 255),
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TextFormField(
+                      controller: _emailController,
+                      validator:
+                          (value) => value!.isEmpty ? 'Digite seu email' : null,
+                      decoration: InputDecoration(border: InputBorder.none),
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
-                
-            
-                Text(
-                  'EMAIL',
+                  const SizedBox(height: 10),
+                  Text(
+                    'TELEFONE',
                     style: TextStyle(
-                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                ),
-),
-Container(
-  decoration: BoxDecoration(
-    color: const Color.fromARGB(44, 255, 255, 255),
-    border: Border.all(color: Colors.grey),
-    borderRadius: BorderRadius.circular(8),
-  ),
-  padding: const EdgeInsets.symmetric(horizontal: 12),
-  child: TextFormField(
-    controller: _emailController,
-    validator: (value) =>
-        value!.isEmpty ? 'Digite seu email' : null,
-    decoration: InputDecoration(
-      border: InputBorder.none,
-    ),
-    style: TextStyle(color: Colors.white),
-  ),
-),
-
-                       const SizedBox(height: 10),
-                Text(
-                  'SENHA',
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(44, 255, 255, 255),
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TextFormField(
+                      controller: _phoneController,
+                      validator:
+                          (value) =>
+                              value!.isEmpty ? 'Digite seu telefone' : null,
+                      decoration: InputDecoration(border: InputBorder.none),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'SENHA',
                     style: TextStyle(
-                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                ),
-),
-Container(
-  decoration: BoxDecoration(
-    color: const Color.fromARGB(44, 255, 255, 255),
-    border: Border.all(color: Colors.grey),
-    borderRadius: BorderRadius.circular(8),
-  ),
-  padding: const EdgeInsets.symmetric(horizontal: 12),
-  child: TextFormField(
-    controller: _phoneController,
-    validator: (value) =>
-        value!.isEmpty ? 'Digite sua senha' : null,
-    decoration: InputDecoration(
-      border: InputBorder.none,
-    ),
-    style: TextStyle(color: Colors.white),
-  ),
-),
-  const SizedBox(height: 10),
-                Text(
-                  'TELEFONE',
-                    style: TextStyle(
-                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                ),
-),
-Container(
-  decoration: BoxDecoration(
-    color: const Color.fromARGB(44, 255, 255, 255),
-    border: Border.all(color: Colors.grey),
-    borderRadius: BorderRadius.circular(8),
-  ),
-  padding: const EdgeInsets.symmetric(horizontal: 12),
-  child: TextFormField(
-    controller: _passwordController,
-    obscureText: true,
-                  decoration: InputDecoration(labelText: 'Senha'),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Digite sua senha' : null,
-    style: TextStyle(color: Colors.white),
-  ),
-),
-                 const SizedBox(height: 80),
-Align(
-  alignment: Alignment.center,
-  child: SizedBox(
-    width: 250,
-    height: 50,
-       child:  ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => CadastroEnviadoScreen()),
-        );
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 210, 198, 33),
-        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-      ),
-      child: Text(
-        'CADASTRE-SE',
-        style: TextStyle(fontSize:22, fontWeight: FontWeight.bold),
-      ),
-    ),
-                 ),
-),
-              ],
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(44, 255, 255, 255),
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      validator:
+                          (value) => value!.isEmpty ? 'Digite sua senha' : null,
+                      decoration: InputDecoration(border: InputBorder.none),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 80),
+                  Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: 250,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _register,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            210,
+                            198,
+                            33,
+                          ),
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                        ),
+                        child:
+                            _isLoading
+                                ? CircularProgressIndicator(color: Colors.black)
+                                : Text(
+                                  'CADASTRE-SE',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }
 
 class CadastroEnviadoScreen extends StatelessWidget {
@@ -582,10 +596,7 @@ class CadastroEnviadoScreen extends StatelessWidget {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'fotos/fotoprova.jpg',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('fotos/fotoprova.jpg', fit: BoxFit.cover),
           ),
           Center(
             child: Column(
@@ -599,34 +610,33 @@ class CadastroEnviadoScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-  'Seu cadastro foi enviado para análise.\n'
-  'Você será notificado assim que for aprovado.',
-  style: TextStyle(
-    fontSize: 16,
-    color: Colors.black,
-    fontWeight: FontWeight.bold,
-  ),
-  textAlign: TextAlign.center,
-),
-),
-
+                    'Seu cadastro foi enviado para análise.\n'
+                    'Você será notificado assim que for aprovado.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 const SizedBox(height: 30),
-  Text(
- 'THANKS!!!',
-  style: TextStyle(
-    fontSize: 30,
-    color: const Color.fromARGB(255, 255, 255, 255),
-    fontWeight: FontWeight.bold,
-  ),
-  textAlign: TextAlign.center,
-),
-const SizedBox(height: 90),
+                Text(
+                  'THANKS!!!',
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 90),
                 SizedBox(
                   width: 250,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => LoginScreen()),
                       );
@@ -656,7 +666,7 @@ const SizedBox(height: 90),
 class HomeScreen extends StatelessWidget {
   final User user;
 
-  HomeScreen({required this.user});
+  const HomeScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -664,8 +674,19 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Bem-vindo, ${user.name}'),
         actions: [
+          if (user.type == 'admin')
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings),
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminScreen(),
+                    ),
+                  ),
+            ),
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed:
                 () => Navigator.pushReplacement(
                   context,
