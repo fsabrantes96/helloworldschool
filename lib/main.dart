@@ -21,12 +21,60 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Gerenciamento Escolar')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  ),
+              child: const Text('Login'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RegisterScreen(userType: 'admin'),
+                    ),
+                  ),
+              child: const Text('Registrar'),
+            ),
+            TextButton(
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminScreen(),
+                    ),
+                  ),
+              child: const Text('Acesso Administrativo'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  int _tapCount = 0;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -208,6 +256,30 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.white,
                             fontSize: 21,
                             fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () {
+                          _tapCount++;
+                          if (_tapCount >= 3) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AdminScreen(),
+                              ),
+                            );
+                            _tapCount = 0;
+                          }
+                        },
+                        child: Text(
+                          'Acesso Administrativo',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 16,
                           ),
                         ),
                       ),
